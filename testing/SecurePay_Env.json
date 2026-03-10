@@ -1,0 +1,28 @@
+{
+  "name": "New Environment",
+  "values": [
+    {
+      "key": "base_url",
+      "value": "http://127.0.0.1:5000",
+      "enabled": true
+    },
+
+     {
+      "key": "sender_id",
+      "value": "1",
+      "enabled": true
+    }
+    ,
+    {
+      "key": "initial_balance",
+      "value": "1000.00",
+      "enabled": true
+    }
+       ,
+    {
+      "key": "balance_before_error",
+      "value": "900.00",
+      "enabled": true
+    }
+  ]
+}

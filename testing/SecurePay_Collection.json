@@ -1,0 +1,767 @@
+{
+  "info": {
+    "_postman_id": "852a974b-9237-4998-9437-2109db608cae",
+    "name": "SecurePay_Testing",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "52657583",
+    "_collection_link": "https://go.postman.co/collection/52657583-852a974b-9237-4998-9437-2109db608cae?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "Structure Testing",
+      "item": [
+        {
+          "name": "Test 1.1: HTTP Protocol & Handshake",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"ST_001: Response Status is 200 OK\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/accounts",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "accounts"
+              ]
+            },
+            "description": "**Purpose:** To ensure the server is alive and communicating via the correct protocol."
+          },
+          "response": []
+        },
+        {
+          "name": "Test 1.2: Header & Format Validation",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"ST_002: Content-Type is application/json\", function () {\r",
+                  "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/accounts",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "accounts"
+              ]
+            },
+            "description": "Purpose: To ensure the Backend is strictly sending JSON (not HTML or plain text). If the DType is wrong, the Frontend will crash."
+          },
+          "response": []
+        },
+        {
+          "name": "Test 1.3: Data Type (DType) Enforcement",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"ST_003: Schema DTypes match DB definition\", function () {\r",
+                  "    const firstAccount = pm.response.json()[0];\r",
+                  "    pm.expect(firstAccount.id).to.be.a(\"number\");\r",
+                  "    pm.expect(firstAccount.account_holder).to.be.a(\"string\");\r",
+                  "    pm.expect(firstAccount.balance).to.be.a(\"number\");\r",
+                  "    pm.expect(firstAccount.status).to.be.a(\"string\");\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/accounts",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "accounts"
+              ]
+            },
+            "description": "Purpose: To verify the \"Pipe\" didn't change the data. (e.g., MySQL INT must be a JSON Number)."
+          },
+          "response": []
+        },
+        {
+          "name": "Test 1.4: Mandatory Column Check (Constraints)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"ST_004: All Mandatory DB Keys are present\", function () {\r",
+                  "    const keys = Object.keys(pm.response.json()[0]);\r",
+                  "    const expectedKeys = [\"id\", \"account_holder\", \"balance\", \"status\"];\r",
+                  "    pm.expect(keys).to.include.members(expectedKeys);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/accounts",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "accounts"
+              ]
+            },
+            "description": "**Purpose:** To ensure no \"Non-Nullable\" columns from your DB are missing in the API response."
+          },
+          "response": []
+        },
+        {
+          "name": "Test 1.5: Structural Integrity (Array Check)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"ST_005: Root response is a JSON Array\", function () {\r",
+                  "    pm.expect(pm.response.json()).to.be.an(\"array\");\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/accounts",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "accounts"
+              ]
+            },
+            "description": "Purpose: Since /accounts should return a list, we verify the root structure is an Array, not a single Object."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Mapping Testing",
+      "item": [
+        {
+          "name": "Test 2.1: Primary Key (ID) Mapping",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"MT_001: Record ID 1 exists in response\", function () {\r",
+                  "    const jsonData = pm.response.json();\r",
+                  "    const faizan = jsonData.find(acc => acc.id === 1);\r",
+                  "    pm.expect(faizan).to.not.be.undefined;\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/accounts",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "accounts"
+              ]
+            },
+            "description": "Purpose: To ensure the Unique ID from the DB is correctly mapped to the JSON."
+          },
+          "response": []
+        },
+        {
+          "name": "Test 2.2: String Content Mapping (Names)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"MT_002: ID 1 correctly maps to 'Faizan'\", function () {\r",
+                  "    const faizan = pm.response.json().find(acc => acc.id === 1);\r",
+                  "    pm.expect(faizan.account_holder).to.eql(\"Faizan\");\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/accounts",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "accounts"
+              ]
+            },
+            "description": "Purpose: To verify that the account_holder string matches the DB record exactly (Case-sensitive)."
+          },
+          "response": []
+        },
+        {
+          "name": "Test 2.3: Numerical Value Mapping (Balances)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"MT_003: Faizan's balance matches DB (1000.00)\", function () {\r",
+                  "    const faizan = pm.response.json().find(acc => acc.id === 1);\r",
+                  "    // We use parseFloat to compare values even if one is a string\r",
+                  "    pm.expect(parseFloat(faizan.balance)).to.eql(1000.00);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/accounts",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "accounts"
+              ]
+            },
+            "description": "StartFragment**Purpose:** To verify the balance amount matches. (Even if it stays a string, we check the _value_)."
+          },
+          "response": []
+        },
+        {
+          "name": "Test 2.4: ENUM/Status Mapping",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"MT_004: All initial accounts are 'active'\", function () {\r",
+                  "    const jsonData = pm.response.json();\r",
+                  "    jsonData.forEach(acc => {\r",
+                  "        pm.expect(acc.status).to.eql(\"active\");\r",
+                  "    });\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/accounts",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "accounts"
+              ]
+            },
+            "description": "Purpose: To ensure the Status ENUM from MySQL is mapped correctly."
+          },
+          "response": []
+        },
+        {
+          "name": "Test 2.5: Cross-Record Integrity (Anas Mapping)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"MT_005: ID 2 maps correctly to 'Anas'\", function () {\r",
+                  "    const anas = pm.response.json().find(acc => acc.id === 2);\r",
+                  "    pm.expect(anas.account_holder).to.eql(\"Anas\");\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/accounts",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "accounts"
+              ]
+            },
+            "description": "Purpose: To ensure the second record didn't get corrupted or swapped."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "CRUD Testing",
+      "item": [
+        {
+          "name": "Test 3.1: Get Initial Balance (GET)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Capture Initial Balance\", function () {\r",
+                  "    const jsonData = pm.response.json();\r",
+                  "    const faizan = jsonData.find(acc => acc.id === 1);\r",
+                  "    \r",
+                  "    // Save the balance to the environment\r",
+                  "    pm.environment.set(\"initial_balance\", faizan.balance);\r",
+                  "    console.log(\"Initial Balance Captured: \" + faizan.balance);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/accounts",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "accounts"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Test 3.2: Transfer & Verify (POST)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// 1. Check if the API said Success\r",
+                  "pm.test(\"FT_001: Transfer API Success\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "// 2. The Chain Verification (Logic Check)\r",
+                  "// We send a NEW request from inside this test to check the balance again\r",
+                  "const baseUrl = pm.environment.get(\"base_url\");\r",
+                  "const initialBalance = parseFloat(pm.environment.get(\"initial_balance\"));\r",
+                  "const transferAmount = 100.00;\r",
+                  "\r",
+                  "pm.sendRequest(`${baseUrl}/accounts`, function (err, res) {\r",
+                  "    if (err) { console.log(err); } \r",
+                  "    else {\r",
+                  "        pm.test(\"FT_002: Chain Check - Sender balance deducted correctly\", function () {\r",
+                  "            const accounts = res.json();\r",
+                  "            const faizan = accounts.find(acc => acc.id === 1);\r",
+                  "            const expectedBalance = initialBalance - transferAmount;\r",
+                  "            \r",
+                  "            pm.expect(parseFloat(faizan.balance)).to.eql(expectedBalance);\r",
+                  "        });\r",
+                  "    }\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n\"sender_id\": 1,\r\n\"receiver_id\": 2,\r\n\"amount\": 100.00\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/transfer",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "transfer"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Negative & Security Testing",
+      "item": [
+        {
+          "name": "Test 4.1: The \"Insufficent Funds\"",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"NS_001: Block transfer exceeding balance\", function () {\r",
+                  "    pm.response.to.have.status(400); // Expecting client error\r",
+                  "    pm.expect(pm.response.json().error).to.include(\"Insufficient funds\");\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"sender_id\": 1, \"receiver_id\": 2, \"amount\": 50000.00 }",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/transfer",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "transfer"
+              ]
+            },
+            "description": "**Purpose:** To verify that a user cannot spend more than their balance."
+          },
+          "response": []
+        },
+        {
+          "name": "Test 4.2: The \"Anti-Gravity\" (Negative Amount)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"NS_002: Block negative transfer amounts\", function () {\r",
+                  "    pm.response.to.have.status(400);\r",
+                  "    pm.expect(pm.response.json().error).to.include(\"Invalid amount\");\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"sender_id\": 1, \"receiver_id\": 2, \"amount\": -100.00 }",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/transfer",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "transfer"
+              ]
+            },
+            "description": "Purpose: To ensure a user cannot \"steal\" money by sending a negative value (which would mathematically add money to the sender)."
+          },
+          "response": []
+        },
+        {
+          "name": "Test 4.3: The \"Ghost User\" (Foreign Key Security)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"NS_003: Handle non-existent receiver\", function () {\r",
+                  "    // This tests if our Python/SQL rollback works properly\r",
+                  "    pm.expect(pm.response.status).to.be.oneOf([\"Error\", \"Bad Request\", 400]);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"sender_id\": 1, \"receiver_id\": 9999, \"amount\": 10.00 }",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/transfer",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "transfer"
+              ]
+            },
+            "description": "Purpose: To see how the system handles a transfer to a non-existent account."
+          },
+          "response": []
+        },
+        {
+          "name": "Test 4.4: The \"SQL Injection\" (Security)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"NS_004: Sanitization check for SQL Injection\", function () {\r",
+                  "    // A secure API should return a 400/500 or just fail to find the ID\r",
+                  "    // It should NEVER return a 200 Success for a hacked ID\r",
+                  "    pm.response.to.not.have.status(200);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"sender_id\": 1, \"receiver_id\": 9999, \"amount\": 10.00 }"
+            },
+            "url": {
+              "raw": "{{base_url}}/transfer",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "transfer"
+              ]
+            },
+            "description": "Purpose: To verify the API is safe from malicious code in the input fields."
+          },
+          "response": []
+        },
+        {
+          "name": "Test 4.5: The \"Zero Value\" Boundary Test",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"NS_005: Block zero-value transactions\", function () {\r",
+                  "    pm.response.to.have.status(400);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"sender_id\": 1, \"receiver_id\": 2, \"amount\": 0.00 }",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/transfer",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "transfer"
+              ]
+            },
+            "description": "Purpose: To ensure the system doesn't waste database resources on $0 transactions."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Backend Logic Test (The \"Acid\" Test)",
+      "item": [
+        {
+          "name": "Test 5.1: The Rollback Verification (Post-500 Check)",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "// This runs BEFORE the request is sent\r",
+                  "// It captures the \"True\" balance from the DB right now\r",
+                  "const baseUrl = pm.environment.get(\"base_url\");\r",
+                  "\r",
+                  "pm.sendRequest(`${baseUrl}/accounts`, function (err, res) {\r",
+                  "    const faizan = res.json().find(acc => acc.id === 1);\r",
+                  "    pm.environment.set(\"balance_before_error\", faizan.balance);\r",
+                  "    console.log(\"Pre-test Balance Captured: \" + faizan.balance);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"BL_001: Rollback Integrity - Balance did not change after 500 Error\", function () {\r",
+                  "    // 1. We expect the server to have failed (because we sent a ghost user)\r",
+                  "    pm.expect(pm.response.code).to.be.oneOf([500, 404, 400]);\r",
+                  "\r",
+                  "    // 2. We trigger a fresh check to see the current balance\r",
+                  "    const baseUrl = pm.environment.get(\"base_url\");\r",
+                  "    const balanceBefore = parseFloat(pm.environment.get(\"balance_before_error\"));\r",
+                  "\r",
+                  "    pm.sendRequest(`${baseUrl}/accounts`, function (err, res) {\r",
+                  "        const faizan = res.json().find(acc => acc.id === 1);\r",
+                  "        const balanceAfter = parseFloat(faizan.balance);\r",
+                  "\r",
+                  "        pm.test(\"Verification: Balance After (\" + balanceAfter + \") == Before (\" + balanceBefore + \")\", function() {\r",
+                  "            pm.expect(balanceAfter).to.eql(balanceBefore);\r",
+                  "        });\r",
+                  "    });\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"sender_id\": 1, \"receiver_id\": 9999, \"amount\": 100}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/accounts",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "accounts"
+              ]
+            },
+            "description": "- **Scenario:** We just got a `500 error` from the Ghost User test (Test 4.3).\n    \n- **The Goal:** Prove that even though the server \"crashed,\" the sender's money was **not** deducted."
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
