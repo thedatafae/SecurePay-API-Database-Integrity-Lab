@@ -11,7 +11,9 @@ This project generates a professional **Newman HTML Dashboard** for every test r
 * **Visual Evidence**: Detailed logs of every Request/Response pair, including headers and JSON bodies.
 * **Failure Analysis**: Dedicated section for failed tests, showing exactly where the Database logic broke.
 
-> **View the Interactive Report**: `reports/SecurePay_Report.html`
+>![Newman Report Summary](https://github.com/thedatafae/SecurePay-API-Database-Integrity-Lab/raw/main/reports/summary.png)
+
+> **🔗 [View Interactive HTML Report](https://htmlpreview.github.io/?https://github.com/thedatafae/SecurePay-API-Database-Integrity-Lab/blob/main/reports/SecurePay_Report.html)**
 
 ---
 
