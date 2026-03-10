@@ -1,0 +1,1 @@
+SELECT COUNT(*) FROM transactions WHERE receiver_id = 9999;
